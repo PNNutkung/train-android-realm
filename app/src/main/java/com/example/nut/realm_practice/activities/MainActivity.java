@@ -14,6 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -114,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void basicQuery(Realm realm) {
-        
+        showStatus("\nPerforming basic Query operation...");
+        showStatus(String.format("Number of persons: %d", realm.where(Person.class).count()));
+
+        RealmResults<Person> results = realm.where(Person.class).equalTo("cats.name", "Tiger").findAll();
+
+        showStatus(String.format("Size of result set: %d", results.size()));
     }
+    
 }
