@@ -120,6 +120,15 @@ public class MainActivity extends AppCompatActivity {
     private void basicQuery(Realm realm) {
         showStatus("\nPerforming basic Query operation...");
         showStatus(String.format("Number of persons: %d", realm.where(Person.class).count()));
+        RealmResults<Person> results = realm.where(Person.class)
+                .equalTo("age", 90)
+                .findAll();
+        showStatus("Size of result set: " + results.size());
+    }
+
+    private void basicLinkQuery(Realm realm) {
+        showStatus("\nPerforming basic Query operation...");
+        showStatus("Number of persons: " + realm.where(Person.class).count());
 
         RealmResults<Person> results = realm.where(Person.class).equalTo("cats.name", "Tiger").findAll();
 
