@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.nut.realm_practice.R;
+import com.example.nut.realm_practice.models.Cat;
+import com.example.nut.realm_practice.models.Dog;
 import com.example.nut.realm_practice.models.Person;
 
 import butterknife.BindView;
@@ -15,6 +17,7 @@ import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -122,5 +125,47 @@ public class MainActivity extends AppCompatActivity {
 
         showStatus(String.format("Size of result set: %d", results.size()));
     }
-    
+
+    private String complexReadWrite() {
+        String status = "\nPerforming complex Read/Write operation...";
+
+        Realm realm = Realm.getInstance(realmConfiguration);
+
+        // Add ten persons in one transaction
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Dog fido = realm.createObject(Dog.class);
+                fido.name = "fido";
+                for (int i = 0; i < 10; ++i) {
+                    Person person = realm.createObject(Person.class);
+                    person.setId(i);
+                    person.setName(String.format("Person no. %d",i));
+                    person.setAge(i);
+                    person.setDog(fido);
+
+                    // The field tempReference is annotated with @Ignore.
+                    // This means setTempReference sets the Person tempReference
+                    // field directly. The tempReference is NOT saved as part of
+                    // the RealmObject:
+                    person.setTempReference(42);
+
+                    for (int j = 0; j < i; ++j) {
+                        Cat cat = realm.createObject(Cat.class);
+                        cat.name = String.format("Cat_%d", j);
+                        person.getCats().add(cat);
+                    }
+                }
+            }
+        });
+
+        // Implicit read transactions allow you to access your objects
+        status += "\nNumber of persons: " + realm.where(Person.class).count();
+
+        // Sorting
+        RealmResults<Person> sortedPersons = realm.where(Person.class).findAllSorted("age", Sort.DESCENDING);
+        status += String.format("\nSorting %s == %s",sortedPersons.last().getName(),realm.where(Person.class).findFirst());
+        realm.close();
+        return status;
+    }
 }
