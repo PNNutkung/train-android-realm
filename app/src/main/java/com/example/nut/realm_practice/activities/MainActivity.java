@@ -168,4 +168,20 @@ public class MainActivity extends AppCompatActivity {
         realm.close();
         return status;
     }
+
+    private String complexQuery() {
+        String status = String.format("\n\nPerforming complex Query operation...");
+
+        Realm realm = Realm.getInstance(realmConfiguration);
+        status += String.format("\nNumber of persons: %d", realm.where(Person.class).count());
+
+        // Find all persons where age between 7 and 9 and name begins with "Person".
+        RealmResults<Person> results = realm.where(Person.class)
+                .between("age", 7, 9)
+                .beginsWith("name", "Person")
+                .findAll();
+        status += String.format("\nSize of result set: %d", results.size());
+        realm.close();
+        return status;
+    }
 }
